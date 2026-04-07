@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetic Data Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .layout {
+            display: flex;
+            gap: 20px;
+        }
+        .left-panel {
+            flex: 1;
+            min-width: 400px;
+        }
+        .right-panel {
+            flex: 0 0 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .column-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        input, select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 150px;
+        }
+        select {
+            width: 180px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-add {
+            background-color: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .noise-value {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Synthetic Data Generator</h1>
+        
+        <div class="layout">
+            <div class="left-panel">
+                <div class="section">
+                    <h3>Column Definition</h3>
+                    <div id="columns-container">
+                        <div class="column-item">
+                            <input type="text" placeholder="Column Name" class="column-name">
+                            <select class="column-type">
+                                <option value="">Select Data Type</option>
+                                <option value="Name">Name</option>
+                                <option value="Email">Email</option>
+                                <option value="Address">Address</option>
+                                <option value="Phone Number">Phone Number</option>
+                                <option value="Company Name">Company Name</option>
+                                <option value="Date">Date</option>
+                                <option value="Integer">Integer</option>
+                                <option value="Float">Float</option>
+                                <option value="Text/Job Title">Text/Job Title</option>
+                                <option value="Country">Country</option>
+                            </select>
+                            <button class="btn-danger" onclick="removeColumn(this)">Remove</button>
+                        </div>
+                    </div>
+                    <button class="btn-add" onclick="addColumn()">Add Column</button>
+                </div>
+
+                <div class="section">
+                    <h3>Generation Parameters</h3>
+                    <div>
+                        <label>Row Count:</label>
+                        <input type="number" id="row-count" value="100" min="1" max="10000">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label>Data Noise/Imperfection Level: <span class="noise-value" id="noise-value">0%</span></label>
+                        <input type="range" id="noise-slider" class="slider" min="0" max="50" value="0" step="1">
+                        <small>Randomly introduces NULL values or typos in the specified percentage of data</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <button class="btn-primary" onclick="generateData()" style="width: 100%;">Generate Data</button>
+                <button class="btn-success hidden" id="download-btn" onclick="downloadCSV()" style="width: 100%;">Download CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedCSV = null;
+
+        // Update noise value display
+        document.getElementById('noise-slider').addEventListener('input', function() {
+            document.getElementById('noise-value').textContent = this.value + '%';
+        });
+
+        function addColumn() {
+            const container = document.getElementById('columns-container');
+            const columnItem = document.createElement('div');
+            columnItem.className = 'column-item';
+            columnItem.innerHTML = `
+                <input type="text" placeholder="Column Name" class="column-name">
+                <select class="column-type">
+                    <option value="">Select Data Type</option>
+                    <option value="Name">Name</option>
+                    <option value="Email">Email</option>
+                    <option value="Address">Address</option>
+                    <option value="Phone Number">Phone Number</option>
+                    <option value="Company Name">Company Name</option>
+                    <option value="Date">Date</option>
+                    <option value="Integer">Integer</option>
+                    <option value="Float">Float</option>
+                    <option value="Text/Job Title">Text/Job Title</option>
+                    <option value="Country">Country</option>
+                </select>
+                <button class="btn-danger" onclick="removeColumn(this)">Remove</button>
+            `;
+            container.appendChild(columnItem);
+        }
+
+        function removeColumn(button) {
+            const container = document.getElementById('columns-container');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('You must have at least one column');
+            }
+        }
+
+        function validateColumns() {
+            const columnItems = document.querySelectorAll('.column-item');
+            const columns = [];
+            
+            for (let item of columnItems) {
+                const name = item.querySelector('.column-name').value.trim();
+                const type = item.querySelector('.column-type').value;
+                
+                if (!name) {
+                    alert('Please enter a column name');
+                    return null;
+                }
+                
+                if (!type) {
+                    alert('Please select a data type for column: ' + name);
+                    return null;
+                }
+                
+                columns.push({ name, type });
+            }
+            
+            return columns;
+        }
+
+        async function generateData() {
+            const columns = validateColumns();
+            if (!columns) return;
+            
+            const rowCount = document.getElementById('row-count').value;
+            const noiseLevel = document.getElementById('noise-slider').value;
+            
+            if (!rowCount || rowCount < 1) {
+                alert('Please enter a valid row count');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        columns: columns,
+                        rowCount: parseInt(rowCount),
+                        noiseLevel: parseFloat(noiseLevel)
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    generatedCSV = blob;
+                    document.getElementById('download-btn').classList.remove('hidden');
+                    alert('Data generated successfully! Click "Download CSV" to download.');
+                } else {
+                    const error = await response.json();
+                    alert('Error generating data: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error generating data: ' + error.message);
+            }
+        }
+
+        function downloadCSV() {
+            if (generatedCSV) {
+                const url = window.URL.createObjectURL(generatedCSV);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'synthetic_data.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -178,33 +178,13 @@
             border: 1px solid var(--border-color);
         }
 
-        .play-icon {
+        .video-container video {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .play-icon:hover {
-            background-color: #4ce4c4;
-            transform: translate(-50%, -50%) scale(1.1);
-        }
-
-        .play-icon::before {
-            content: ">";
-            font-size: 2rem;
-            color: var(--primary-bg);
-            font-weight: bold;
-            margin-left: 8px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .video-label {
@@ -417,7 +397,7 @@
             <a href="#features">Features</a>
             <a href="#use-cases">Use Cases</a>
             <a href="#faq">FAQ</a>
-            <a href="#app-link" class="cta-button">Launch App</a>
+            <a href="https://rebrand.ly/SynthDataTool" class="cta-button">Launch App</a>
         </div>
     </nav>
 
@@ -426,7 +406,7 @@
         <h1>Train Your AI on Realistic Chaos</h1>
         <p>Generate privacy-safe synthetic data with realistic noise, typos, and logical anomalies. Stress-test your models before they go live.</p>
         <div class="hero-buttons">
-            <a href="#app-link" class="primary-button">Get Started Free</a>
+            <a href="https://rebrand.ly/SynthDataTool" class="primary-button">Get Started Free</a>
             <a href="#video-placeholder" class="secondary-button">Watch Demo</a>
         </div>
     </section>
@@ -434,7 +414,10 @@
     <!-- Video Section -->
     <section class="video-section" id="video-placeholder">
         <div class="video-container">
-            <div class="play-icon"></div>
+            <video id="demo-video" width="100%" height="100%" controls style="border-radius: 8px;">
+                <source src="assets/demo.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
         <p class="video-label">See how SynthData injects chaos into your pipeline</p>
     </section>
@@ -483,7 +466,7 @@
     <!-- CTA Footer -->
     <section class="cta-footer">
         <h2>Ready to clean your data?</h2>
-        <a href="#app-link" class="primary-button">Start Generating Now</a>
+        <a href="https://rebrand.ly/SynthDataTool" class="primary-button">Start Generating Now</a>
     </section>
 
     <!-- Footer -->
@@ -521,11 +504,6 @@
                     }
                 }
             });
-        });
-
-        // Play icon click handler (placeholder for video)
-        document.querySelector('.play-icon').addEventListener('click', function() {
-            alert('Video demo would play here. This is a placeholder for the actual video content.');
         });
 
         // Close mobile menu when clicking outside
